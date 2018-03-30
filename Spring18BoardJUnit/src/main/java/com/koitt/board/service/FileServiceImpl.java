@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,17 +26,18 @@ public class FileServiceImpl implements FileService {
 			// 최상위 경로 밑에 upload 폴더 경로를 가져온다.
 			String path = request.getServletContext().getRealPath(UPLOAD_FOLDER);
 
-			// MultipartFile 객체에서 파일명을 가져온다.
-			String originalName = attachment.getOriginalFilename();
-
-			// upload 폴더가 없다면, upload 폴더 생성
-			File directory = new File(path);
-			if (!directory.exists()) {
-				directory.mkdir();
-			}
-
 			// attachment 객체를 이용하여, 파일을 서버에 전송
 			if (attachment != null && !attachment.isEmpty()) {
+				
+				// MultipartFile 객체에서 파일명을 가져온다.
+				String originalName = attachment.getOriginalFilename();
+				originalName = FilenameUtils.getName(originalName);
+
+				// upload 폴더가 없다면, upload 폴더 생성
+				File directory = new File(path);
+				if (!directory.exists()) {
+					directory.mkdir();
+				}
 				
 				/*
 				 * 중복된 파일명을 피하기 위해 시간값을 파일명에 붙이는 작업
@@ -89,7 +91,7 @@ public class FileServiceImpl implements FileService {
 		String directory = request.getServletContext().getRealPath(UPLOAD_FOLDER);
 		
 		// 요청한 파일명으로 실제 파일을 객체화 하기
-		File file = new File(directory, filename);
+		File file = new File(directory, FilenameUtils.getName(filename));
 		
 		FileInputStream fis = null;
 		BufferedOutputStream bos = null;
@@ -158,7 +160,7 @@ public class FileServiceImpl implements FileService {
 			}
 			
 			// 서버에 저장된 파일을 불러와서 객체화 시킴
-			File file = new File(path, filename);
+			File file = new File(path, FilenameUtils.getName(filename));
 
 			// 만약 파일이 존재하면 파일을 삭제한다.
 			if (file.exists()) {
